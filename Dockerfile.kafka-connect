@@ -1,0 +1,19 @@
+ARG CONFLUENT_VERSION=6.0.0
+
+FROM maven:3.8-jdk-11
+
+ADD kafka-connect-insert-uuid /app/kafka-connect-insert-uuid
+WORKDIR /app/kafka-connect-insert-uuid
+RUN mvn clean install -DskipTests
+
+FROM confluentinc/cp-kafka-connect:$CONFLUENT_VERSION
+ENV CONFLUENT_VERSION $CONFLUENT_VERSION
+LABEL version=$CONFLUENT_VERSION
+
+RUN wget https://repo1.maven.org/maven2/io/debezium/debezium-connector-mysql/1.9.7.Final/debezium-connector-mysql-1.9.7.Final-plugin.tar.gz
+RUN tar xzf debezium-connector-mysql-1.9.7.Final-plugin.tar.gz
+RUN cp -R debezium-connector-mysql /usr/share/java
+
+COPY --from=0 /app/kafka-connect-insert-uuid/target/InsertUuid-1.0-SNAPSHOT.jar /usr/share/java/debezium-connector-mysql/InsertUuid-1.0-SNAPSHOT.jar
+
+CMD ["/etc/confluent/docker/run"]

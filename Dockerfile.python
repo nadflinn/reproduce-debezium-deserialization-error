@@ -1,0 +1,9 @@
+from python:3.7.15-slim-buster
+
+RUN apt update && apt install vim -y && pip install mysql-connector-python
+
+ADD reproduce_deserialization_error.py /opt/reproduce_deserialization_error.py
+
+WORKDIR /opt
+
+CMD ["sleep", "infinity"]
